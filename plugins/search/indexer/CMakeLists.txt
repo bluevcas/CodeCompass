@@ -8,11 +8,18 @@ include_directories(SYSTEM
 
 add_custom_command(
   OUTPUT
+    # C++ 文件
     ${CMAKE_CURRENT_BINARY_DIR}/gen-cpp/searchindexer_constants.cpp
     ${CMAKE_CURRENT_BINARY_DIR}/gen-cpp/searchindexer_types.cpp
     ${CMAKE_CURRENT_BINARY_DIR}/gen-cpp/IndexerService.cpp
+    # 目录
     ${CMAKE_CURRENT_BINARY_DIR}/gen-cpp
     ${CMAKE_CURRENT_BINARY_DIR}/gen-java
+    # Java 文件（明确列出）
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/parser/search/FieldValue.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/parser/search/IndexerService.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/parser/search/Location.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/parser/search/searchindexerConstants.java
   COMMAND
     ${THRIFT_EXECUTABLE} --gen cpp --gen java
       -o ${CMAKE_CURRENT_BINARY_DIR}
@@ -39,7 +46,14 @@ add_jar(searchindexerthriftjava
   ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/parser/search/searchindexerConstants.java
   OUTPUT_NAME searchindexerthrift)
 
-add_dependencies(searchindexerthriftjava searchindexerthrift)
+# 确保 Java 文件在 JAR 构建前生成
+add_custom_target(generate_searchindexer_java_thrift
+  DEPENDS 
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/parser/search/FieldValue.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/parser/search/IndexerService.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/parser/search/Location.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/parser/search/searchindexerConstants.java)
+add_dependencies(searchindexerthriftjava generate_searchindexer_java_thrift)
 
 # Java indexer
 add_subdirectory(indexer-java)

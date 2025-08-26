@@ -1,5 +1,8 @@
 add_subdirectory(authenticators)
 
+# 查找 OpenSSL
+find_package(OpenSSL REQUIRED)
+
 add_executable(CodeCompass_webserver
   src/webserver.cpp
   src/authentication.cpp
@@ -13,9 +16,17 @@ set_target_properties(CodeCompass_webserver
 
 add_library(mongoose STATIC src/mongoose.c )
 target_compile_definitions(mongoose PRIVATE -DNS_ENABLE_SSL)
-target_include_directories(mongoose PUBLIC include)
+target_include_directories(mongoose PUBLIC 
+  include
+  # 添加 OpenSSL 包含路径
+  ${OPENSSL_INCLUDE_DIR}
+)
 target_compile_options(mongoose PUBLIC -fPIC)
-target_link_libraries(mongoose PRIVATE ssl)
+# 正确链接 vcpkg 安装的 OpenSSL 库
+target_link_libraries(mongoose PRIVATE 
+  OpenSSL::SSL 
+  OpenSSL::Crypto
+)
 
 target_include_directories(CodeCompass_webserver PUBLIC
   include

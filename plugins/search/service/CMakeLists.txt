@@ -14,11 +14,30 @@ include_directories(SYSTEM
 # Generate thrift files
 add_custom_command(
   OUTPUT
+    # C++ 文件
     ${CMAKE_CURRENT_BINARY_DIR}/gen-cpp/search_types.cpp
     ${CMAKE_CURRENT_BINARY_DIR}/gen-cpp/SearchService.cpp
+    # 目录
     ${CMAKE_CURRENT_BINARY_DIR}/gen-cpp
     ${CMAKE_CURRENT_BINARY_DIR}/gen-java
     ${CMAKE_CURRENT_BINARY_DIR}/gen-js
+    # Java 文件（明确列出）
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/DatasourceError.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/FileSearchResult.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/HitCountResult.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/LineMatch.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/RangedHitCountResult.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/SearchException.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/SearchFilter.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/SearchOptions.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/SearchParams.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/SearchRange.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/SearchResult.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/SearchResultEntry.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/SearchService.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/SearchSuggestionParams.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/SearchSuggestions.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/SearchType.java
   COMMAND
     ${THRIFT_EXECUTABLE} --gen cpp --gen js --gen java
       -o ${CMAKE_CURRENT_BINARY_DIR}
@@ -64,7 +83,26 @@ add_jar(searchthriftjava
   OUTPUT_NAME searchthrift
   INCLUDE_JARS searchcommonjava)
 
-add_dependencies(searchthriftjava searchthrift)
+# 确保 Java 文件在 JAR 构建前生成
+add_custom_target(generate_search_service_java_thrift
+  DEPENDS 
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/DatasourceError.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/FileSearchResult.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/HitCountResult.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/LineMatch.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/RangedHitCountResult.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/SearchException.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/SearchFilter.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/SearchOptions.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/SearchParams.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/SearchRange.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/SearchResult.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/SearchResultEntry.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/SearchService.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/SearchSuggestionParams.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/SearchSuggestions.java
+    ${CMAKE_CURRENT_BINARY_DIR}/gen-java/cc/service/search/SearchType.java)
+add_dependencies(searchthriftjava generate_search_service_java_thrift)
 
 # Search java
 add_subdirectory(search-java)

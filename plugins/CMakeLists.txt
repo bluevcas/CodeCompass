@@ -11,7 +11,14 @@ endif()
 file(GLOB plugins RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/*")
 
 # Remove subdirectories according to the provided WITH_PLUGIN or WITHOUT_PLUGIN variables
-set(baseline "search")
+# 如果没有 Java，搜索插件不会被视为基线插件
+if(JAVA_AVAILABLE)
+    set(baseline "search")
+else()
+    set(baseline "")
+    message(STATUS "搜索插件已禁用（需要 Java 支持）")
+endif()
+
 if(WITH_PLUGIN OR WITHOUT_PLUGIN)
   foreach(_base ${baseline})
     if((WITH_PLUGIN AND NOT ("${_base}" IN_LIST WITH_PLUGIN))
@@ -45,6 +52,12 @@ endforeach(_plugin)
 # Add plugins
 foreach(_plugin ${plugins})
   if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${_plugin}")
+    # 检查搜索插件是否需要 Java 支持
+    if("${_plugin}" STREQUAL "search" AND NOT JAVA_AVAILABLE)
+      message(STATUS "跳过搜索插件：需要 Java 支持但 Java 不可用")
+      continue()
+    endif()
+    
     set(PLUGIN_NAME ${_plugin})
     set(PLUGIN_DIR ${${_plugin}_PLUGIN_DIR})
     set(PLUGIN_BINARY_DIR ${${_plugin}_PLUGIN_BINARY_DIR})

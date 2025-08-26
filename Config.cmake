@@ -1,3 +1,14 @@
+# ================ vcpkg 兼容性配置 ================
+# 确保与主 CMakeLists.txt 中的 vcpkg 设置兼容
+if(DEFINED VCPKG_ROOT)
+    message(STATUS "Config.cmake: 检测到 vcpkg 配置")
+    # 添加 vcpkg 包含路径
+    if(EXISTS "${VCPKG_ROOT}/installed/x64-windows/include")
+        list(APPEND CMAKE_PREFIX_PATH "${VCPKG_ROOT}/installed/x64-windows")
+        message(STATUS "Config.cmake: 已添加 vcpkg 前缀路径")
+    endif()
+endif()
+
 # Set a default build type if none was specified
 set(DEFAULT_BUILD_TYPE "RelWithDebInfo")
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -72,10 +83,15 @@ string(CONCAT CMAKE_INSTALL_RPATH
   ";$ORIGIN/../${INSTALL_LIB_DIR_NAME}/${INSTALL_AUTH_DIR_NAME}")
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-# Odb commands
-set(ODB odb)
+# Odb commands - 使用 vcpkg 配置的 ODB 编译器
+if(DEFINED ODB_EXECUTABLE AND EXISTS "${ODB_EXECUTABLE}")
+    set(ODB "${ODB_EXECUTABLE}")
+else()
+    set(ODB odb)
+endif()
+
 set(ODBFLAGS
-  --std c++11
+  --std c++17
   --database ${DATABASE}
   --generate-query
   --generate-schema
@@ -86,15 +102,22 @@ set(ODBFLAGS
   --include-with-brackets
   --default-pointer "std::shared_ptr")
 
-# Set CXX standard
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+# CXX 标准已在主 CMakeLists.txt 中设置，此处不重复设置
 
-# Set CXX flags
-set(CMAKE_CXX_FLAGS "-W -Wall -Wextra -pedantic\
-  -DDATABASE_${DATABASE_U} \
-  -DBOOST_LOG_DYN_LINK")
+# Set CXX flags - 适配 MSVC 和 GCC
+if(MSVC)
+    # MSVC 编译器标志
+    set(CMAKE_CXX_FLAGS "/W3 /EHsc \
+      -DDATABASE_${DATABASE_U} \
+      -DBOOST_LOG_DYN_LINK \
+      -DBOOST_ALL_DYN_LINK")
+else()
+    # GCC/Clang 编译器标志
+    set(CMAKE_CXX_FLAGS "-W -Wall -Wextra -pedantic \
+      -DDATABASE_${DATABASE_U} \
+      -DBOOST_LOG_DYN_LINK \
+      -DBOOST_ALL_DYN_LINK")
+endif()
 
 # Gold is the primary linker 
 if(NOT DEFINED CODECOMPASS_LINKER)
