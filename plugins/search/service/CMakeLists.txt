@@ -53,7 +53,12 @@ add_library(searchthrift STATIC
   ${CMAKE_CURRENT_BINARY_DIR}/gen-cpp/search_types.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/gen-cpp/SearchService.cpp)
 
-target_compile_options(searchthrift PUBLIC -fPIC)
+# 根据编译器类型设置适当的编译选项
+if(MSVC)
+  target_compile_options(searchthrift PUBLIC /EHsc)
+else()
+  target_compile_options(searchthrift PUBLIC -fPIC)
+endif()
 
 add_dependencies(searchthrift commonthrift projectthrift)
 

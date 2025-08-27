@@ -5,6 +5,7 @@
 #include <memory>
 #include <cstdint>
 
+#include <util/odb_compatibility.h>
 #include <odb/core.hxx>
 #include <odb/lazy-ptr.hxx>
 

@@ -24,13 +24,22 @@ add_custom_command(
 add_library(dummythrift STATIC
   ${CMAKE_CURRENT_BINARY_DIR}/gen-cpp/DummyService.cpp)
 
-target_compile_options(dummythrift PUBLIC -fPIC)
+# 根据编译器类型设置适当的编译选项
+if(MSVC)
+  target_compile_options(dummythrift PUBLIC /EHsc)
+else()
+  target_compile_options(dummythrift PUBLIC -fPIC)
+endif()
 
 add_library(dummyservice SHARED
   src/dummyservice.cpp
   src/plugin.cpp)
 
-target_compile_options(dummyservice PUBLIC -Wno-unknown-pragmas)
+if(MSVC)
+  target_compile_options(dummyservice PUBLIC /EHsc)
+else()
+  target_compile_options(dummyservice PUBLIC -Wno-unknown-pragmas)
+endif()
 
 target_link_libraries(dummyservice
   util

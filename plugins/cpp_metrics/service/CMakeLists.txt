@@ -34,7 +34,12 @@ add_library(cxxmetricsthrift STATIC
   ${CMAKE_CURRENT_BINARY_DIR}/gen-cpp/cxxmetrics_types.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/gen-cpp/CppMetricsService.cpp)
 
-target_compile_options(cxxmetricsthrift PUBLIC -fPIC)
+# 根据编译器类型设置适当的编译选项
+if(MSVC)
+  target_compile_options(cxxmetricsthrift PUBLIC /EHsc)
+else()
+  target_compile_options(cxxmetricsthrift PUBLIC -fPIC)
+endif()
 
 add_dependencies(cxxmetricsthrift projectthrift)
 

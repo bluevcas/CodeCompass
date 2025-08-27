@@ -28,7 +28,12 @@ add_library(workspacethrift STATIC
   ${CMAKE_CURRENT_BINARY_DIR}/gen-cpp/workspace_types.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/gen-cpp/WorkspaceService.cpp)
 
-target_compile_options(workspacethrift PUBLIC -fPIC -Wno-unknown-pragmas)
+# 根据编译器类型设置适当的编译选项
+if(MSVC)
+  target_compile_options(workspacethrift PUBLIC /EHsc)
+else()
+  target_compile_options(workspacethrift PUBLIC -fPIC -Wno-unknown-pragmas)
+endif()
 
 add_library(workspaceservice SHARED
   src/workspaceservice.cpp

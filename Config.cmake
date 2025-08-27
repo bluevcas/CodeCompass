@@ -91,7 +91,7 @@ else()
 endif()
 
 set(ODBFLAGS
-  --std c++17
+  --std c++11
   --database ${DATABASE}
   --generate-query
   --generate-schema
@@ -107,24 +107,44 @@ set(ODBFLAGS
 # Set CXX flags - 适配 MSVC 和 GCC
 if(MSVC)
     # MSVC 编译器标志
-    set(CMAKE_CXX_FLAGS "/W3 /EHsc \
-      -DDATABASE_${DATABASE_U} \
-      -DBOOST_LOG_DYN_LINK \
-      -DBOOST_ALL_DYN_LINK")
+    set(CMAKE_CXX_FLAGS "/W3 /EHsc")
+    # MSVC 使用宏定义而不是命令行选项
+    add_compile_definitions(
+        DATABASE_${DATABASE_U}
+        BOOST_LOG_DYN_LINK
+        BOOST_ALL_DYN_LINK
+        _CRT_SECURE_NO_WARNINGS
+        _CRT_NONSTDC_NO_WARNINGS
+        _SCL_SECURE_NO_WARNINGS
+        UNICODE
+        _UNICODE
+        __STDC_CONSTANT_MACROS
+        __STDC_FORMAT_MACROS
+        __STDC_LIMIT_MACROS
+    )
+    # 确保没有 GCC 选项
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj /permissive- /utf-8")
 else()
     # GCC/Clang 编译器标志
-    set(CMAKE_CXX_FLAGS "-W -Wall -Wextra -pedantic \
-      -DDATABASE_${DATABASE_U} \
-      -DBOOST_LOG_DYN_LINK \
-      -DBOOST_ALL_DYN_LINK")
+    set(CMAKE_CXX_FLAGS "-W -Wall -Wextra -pedantic -fPIC -Wno-unknown-pragmas")
+    add_compile_definitions(
+        DATABASE_${DATABASE_U}
+        BOOST_LOG_DYN_LINK
+        BOOST_ALL_DYN_LINK
+    )
 endif()
 
-# Gold is the primary linker 
+# 设置合适的链接器
 if(NOT DEFINED CODECOMPASS_LINKER)
-    set(CODECOMPASS_LINKER "gold")
+    if(MSVC)
+        # Windows 使用默认的 MSVC 链接器
+        # 不需要显式设置
+    else()
+        # Linux 使用 gold 链接器
+        set(CODECOMPASS_LINKER "gold")
+        set(CMAKE_LINKER "${CODECOMPASS_LINKER}")
+    endif()
 endif()
-
-set(CMAKE_LINKER "${CODECOMPASS_LINKER}")
 
 # Cmake module directory (FindOdb, FindThrift etc.)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -134,5 +154,12 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}")
 # CMAKE_CXX_FLAGS_RELEASE:        -O3 -DNDEBUG
 # CMAKE_CXX_FLAGS_RELWITHDEBINFO: -O2 -g -DNDEBUG
 # CMAKE_CXX_FLAGS_MINSIZEREL:     -Os -DNDEBUG
-set(CMAKE_CXX_FLAGS_DEBUG "-O0 -ggdb3")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -ggdb3 -DNDEBUG")
+if(MSVC)
+    # MSVC 构建类型标志
+    set(CMAKE_CXX_FLAGS_DEBUG "/Od /Zi")
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "/O2 /Zi /DNDEBUG")
+else()
+    # GCC/Clang 构建类型标志
+    set(CMAKE_CXX_FLAGS_DEBUG "-O0 -ggdb3")
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -ggdb3 -DNDEBUG")
+endif()

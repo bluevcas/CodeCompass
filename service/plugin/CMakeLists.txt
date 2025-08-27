@@ -25,7 +25,12 @@ add_custom_command(
 add_library(pluginthrift STATIC
   ${CMAKE_CURRENT_BINARY_DIR}/gen-cpp/PluginService.cpp)
 
-target_compile_options(pluginthrift PUBLIC -fPIC -Wno-unknown-pragmas)
+# 根据编译器类型设置适当的编译选项
+if(MSVC)
+  target_compile_options(pluginthrift PUBLIC /EHsc)
+else()
+  target_compile_options(pluginthrift PUBLIC -fPIC -Wno-unknown-pragmas)
+endif()
 
 add_library(pluginservice SHARED
   src/pluginservice.cpp

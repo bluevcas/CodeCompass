@@ -32,7 +32,12 @@ add_library(gitthrift STATIC
   ${CMAKE_CURRENT_BINARY_DIR}/gen-cpp/git_types.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/gen-cpp/GitService.cpp)
 
-target_compile_options(gitthrift PUBLIC -fPIC)
+# 根据编译器类型设置适当的编译选项
+if(MSVC)
+  target_compile_options(gitthrift PUBLIC /EHsc)
+else()
+  target_compile_options(gitthrift PUBLIC -fPIC)
+endif()
 
 add_library(gitservice SHARED
   src/plugin.cpp

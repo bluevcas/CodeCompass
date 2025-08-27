@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 
+#include <util/odb_compatibility.h>
 #include <odb/core.hxx>
 
 namespace cc

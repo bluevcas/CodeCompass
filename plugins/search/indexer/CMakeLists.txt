@@ -34,7 +34,12 @@ add_library(searchindexerthrift STATIC
   ${CMAKE_CURRENT_BINARY_DIR}/gen-cpp/searchindexer_types.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/gen-cpp/IndexerService.cpp)
 
-target_compile_options(searchindexerthrift PUBLIC -fPIC)
+# 根据编译器类型设置适当的编译选项
+if(MSVC)
+  target_compile_options(searchindexerthrift PUBLIC /EHsc)
+else()
+  target_compile_options(searchindexerthrift PUBLIC -fPIC)
+endif()
 
 # Create java library from thrift files
 set(CMAKE_JAVA_INCLUDE_PATH ${PROJECT_SOURCE_DIR}/lib/java/*)

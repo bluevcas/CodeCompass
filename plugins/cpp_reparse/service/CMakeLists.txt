@@ -43,7 +43,12 @@ add_library(cppreparsethrift STATIC
   ${CMAKE_CURRENT_BINARY_DIR}/gen-cpp/cppreparse_types.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/gen-cpp/CppReparseService.cpp)
 
-target_compile_options(cppreparsethrift PUBLIC -fPIC)
+# 根据编译器类型设置适当的编译选项
+if(MSVC)
+  target_compile_options(cppreparsethrift PUBLIC /EHsc)
+else()
+  target_compile_options(cppreparsethrift PUBLIC -fPIC)
+endif()
 
 add_dependencies(cppreparsethrift commonthrift projectthrift)
 
@@ -55,7 +60,11 @@ add_library(cppreparseservice SHARED
   src/databasefilesystem.cpp
   src/reparser.cpp)
 
-target_compile_options(cppreparseservice PUBLIC -Wno-unknown-pragmas)
+if(MSVC)
+  target_compile_options(cppreparseservice PUBLIC /EHsc)
+else()
+  target_compile_options(cppreparseservice PUBLIC -Wno-unknown-pragmas)
+endif()
 
 target_link_libraries(cppreparseservice
   util

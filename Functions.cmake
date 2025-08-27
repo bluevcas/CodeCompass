@@ -1,3 +1,14 @@
+# 跨平台编译器选项宏
+macro(add_cross_platform_compile_options target)
+  if(MSVC)
+    # MSVC 编译器选项
+    target_compile_options(${target} PUBLIC /EHsc)
+  else()
+    # GCC/Clang 编译器选项
+    target_compile_options(${target} PUBLIC -Wno-unknown-pragmas -fPIC)
+  endif()
+endmacro()
+
 # Generate ODB files from sources
 # @return ODB_CXX_SOURCES - odb cxx source files
 function(generate_odb_files _src)
@@ -21,7 +32,7 @@ function(generate_odb_files _src)
         ${CMAKE_CURRENT_BINARY_DIR}/include/model/${_ixx}
         ${CMAKE_CURRENT_BINARY_DIR}/include/model/${_sql}
       COMMAND
-        mkdir -p ${CMAKE_CURRENT_BINARY_DIR}/include/model
+        ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/include/model
       COMMAND
         ${ODB_EXECUTABLE} ${ODBFLAGS}
           -o ${CMAKE_CURRENT_BINARY_DIR}/include/model
@@ -29,11 +40,13 @@ function(generate_odb_files _src)
           -I ${CMAKE_SOURCE_DIR}/model/include
           -I ${CMAKE_SOURCE_DIR}/util/include
           -I ${ODB_INCLUDE_DIRS}
+          --include-regex '%util/odb_compatibility.h%'
           ${DEPENDENCY_PLUGIN_INCLUDE_DIRS}
           ${CMAKE_CURRENT_SOURCE_DIR}/${_file}
       COMMAND
-        mv ${CMAKE_CURRENT_BINARY_DIR}/include/model/${_cxx}
-           ${CMAKE_CURRENT_BINARY_DIR}
+        ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/include/model/${_cxx} ${CMAKE_CURRENT_BINARY_DIR}
+      COMMAND
+        ${CMAKE_COMMAND} -E remove ${CMAKE_CURRENT_BINARY_DIR}/include/model/${_cxx}
       DEPENDS
         ${CMAKE_CURRENT_SOURCE_DIR}/${_file}
       COMMENT "Generating ODB for ${_file}")
@@ -47,7 +60,12 @@ endfunction(generate_odb_files)
 # Add a new static library target that links against ODB.
 function(add_odb_library _name)
   add_library(${_name} STATIC ${ARGN})
-  target_compile_options(${_name} PUBLIC -Wno-unknown-pragmas -fPIC)
+  # 使用跨平台的编译器选项
+  if(MSVC)
+    target_compile_options(${_name} PUBLIC /EHsc)
+  else()
+    target_compile_options(${_name} PUBLIC -Wno-unknown-pragmas -fPIC)
+  endif()
   target_link_libraries(${_name} ${ODB_LIBRARIES})
   target_include_directories(${_name} PUBLIC
     ${ODB_INCLUDE_DIRS}

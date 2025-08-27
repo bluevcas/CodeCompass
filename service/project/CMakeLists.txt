@@ -58,13 +58,23 @@ add_custom_command(
 add_library(commonthrift STATIC
   ${CMAKE_CURRENT_BINARY_DIR}/gen-cpp/common_types.cpp)
 
-target_compile_options(commonthrift PUBLIC -fPIC)
+# 根据编译器类型设置适当的编译选项
+if(MSVC)
+  target_compile_options(commonthrift PUBLIC /EHsc)
+else()
+  target_compile_options(commonthrift PUBLIC -fPIC)
+endif()
 
 add_library(projectthrift STATIC
   ${CMAKE_CURRENT_BINARY_DIR}/gen-cpp/project_types.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/gen-cpp/ProjectService.cpp)
 
-target_compile_options(projectthrift PUBLIC -fPIC)
+# 根据编译器类型设置适当的编译选项
+if(MSVC)
+  target_compile_options(projectthrift PUBLIC /EHsc)
+else()
+  target_compile_options(projectthrift PUBLIC -fPIC)
+endif()
 
 add_dependencies(projectthrift commonthrift)
 

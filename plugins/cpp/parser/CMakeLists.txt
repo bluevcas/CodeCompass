@@ -64,7 +64,11 @@ target_link_libraries(cppparser
   clangIndex
   clang)
 
-target_compile_options(cppparser PUBLIC -Wno-unknown-pragmas)
+if(MSVC)
+  target_compile_options(cppparser PUBLIC /EHsc)
+else()
+  target_compile_options(cppparser PUBLIC -Wno-unknown-pragmas)
+endif()
 
 install(TARGETS cppparser DESTINATION ${INSTALL_PARSER_DIR})
 

@@ -41,6 +41,10 @@ if(MSVC)
     string(REPLACE "/MT" "/MD" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
     string(REPLACE "/MTd" "/MDd" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
     
+    # 清空 CMAKE_CXX_FLAGS 以避免继承任何默认的 GCC 标志
+    set(CMAKE_CXX_FLAGS "")
+    set(CMAKE_C_FLAGS "")
+    
     # 强制所有编译选项都使用动态运行时库
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MD")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MD")

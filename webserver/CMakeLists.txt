@@ -21,7 +21,12 @@ target_include_directories(mongoose PUBLIC
   # 添加 OpenSSL 包含路径
   ${OPENSSL_INCLUDE_DIR}
 )
-target_compile_options(mongoose PUBLIC -fPIC)
+# 根据编译器类型设置适当的编译选项
+if(MSVC)
+  target_compile_options(mongoose PUBLIC /EHsc)
+else()
+  target_compile_options(mongoose PUBLIC -fPIC)
+endif()
 # 正确链接 vcpkg 安装的 OpenSSL 库
 target_link_libraries(mongoose PRIVATE 
   OpenSSL::SSL 

@@ -3,6 +3,9 @@
 
 #include <memory>
 #include <string>
+
+#include <util/odb_compatibility.h>
+
 #include <model/file.h>
 #include <model/file-odb.hxx>
 

@@ -3,6 +3,7 @@
 
 #include <memory>
 
+#include <util/odb_compatibility.h>
 #include <odb/core.hxx>
 
 #include <model/buildaction.h>
